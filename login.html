@@ -9,6 +9,13 @@
 
 <h2>Panel Administrador</h2>
 
+Uncaught (in promise) ReferenceError: can't access lexical declaration 'email' before initialization
+    <anonymous> https://lunanegraindumentarianetlifyapp.netlify.app/login.html:35
+    EventHandlerNonNull* https://lunanegraindumentarianetlifyapp.netlify.app/login.html:34
+login.html:35:17
+    <anónima> https://lunanegraindumentarianetlifyapp.netlify.app/login.html:35
+    (Asíncrono: EventHandlerNonNull)
+    <anónima> https://lunanegraindumentarianetlifyapp.netlify.app/login.html:34
 <input id="email" type="email" placeholder="Correo">
 <input id="password" type="password" placeholder="Contraseña">
 <button id="loginBtn">Ingresar</button>
@@ -37,13 +44,67 @@ document.getElementById("loginBtn").onclick = async () => {
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (error) alert("Datos incorrectos");
-  else window.location.href = "admin.html";
-};
-</script>
-</body>
-</html>
+  if (error) alert("Datos</html>
 
 </body>
 </html>
 
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Admin - Luna Negra</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="center">
+
+  <div class="login-container">
+    <h2>Panel Administrador</h2>
+    
+    <input id="email" type="email" placeholder="Correo" required>
+    <input id="password" type="password" placeholder="Contraseña" required>
+    <button id="loginBtn">Ingresar</button>
+  </div>
+
+  <script type="module">
+    import { supabase } from "./js/supabase.js";
+
+    const btn = document.getElementById("loginBtn");
+
+    btn.onclick = async (e) => {
+      e.preventDefault();
+
+      // Referencias a los elementos del DOM
+      const emailInput = document.getElementById("email");
+      const passwordInput = document.getElementById("password");
+
+      // Obtenemos los valores de los inputs
+      const userEmail = emailInput.value;
+      const userPassword = passwordInput.value;
+
+      console.log("Intentando iniciar sesión para:", userEmail);
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: userEmail,
+          password: userPassword,
+        });
+
+        if (error) {
+          alert("Error: " + error.message);
+          console.error("Error de autenticación:", error.message);
+        } else {
+          console.log("Login exitoso", data);
+          // Redirigir al panel de administración
+          window.location.href = "admin.html";
+        }
+      } catch (err) {
+        console.error("Error inesperado:", err);
+        alert("Ocurrió un error inesperado al intentar ingresar.");
+      }
+    };
+  </script>
+</body>
+</html>
