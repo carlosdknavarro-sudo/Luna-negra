@@ -1,61 +1,84 @@
+:root {
+  --primario: #1a1a1a;    /* Negro elegante */
+  --secundario: #d4af37;  /* Dorado tipo logo (puedes cambiarlo por tu color) */
+  --fondo: #f8f9fa;
+  --blanco: #ffffff;
+  --sombra: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
 body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background-color: var(--fondo);
+  color: var(--primario);
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #fafafa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
-.header {
-  background: black;
-  color: white;
-  padding: 10px;
-  text-align: center;
-}
-
-.logo {
-  width: 120px;
-}
-
-nav {
-  margin-top: 10px;
-}
-
-.filter {
-  margin: 5px;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-}
-
-.productos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 15px;
-  padding: 15px;
-}
-
-.card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 5px rgba(0,0,0,.1);
-  padding: 10px;
-  text-align: center;
-}
-
-.card img {
+/* El contenedor principal (Login y Admin) */
+.login-container, .admin-panel {
+  background: var(--blanco);
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: var(--sombra);
   width: 100%;
-  border-radius: 10px;
+  max-width: 400px;
+  text-align: center;
 }
 
-.whatsapp {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #25D366;
+h2 {
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+}
+
+/* Inputs modernos */
+input, select {
+  width: 100%;
+  padding: 12px 15px;
+  margin: 10px 0;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  box-sizing: border-box; /* Para que no se salgan del borde */
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--primario);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+/* El botón canchero */
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 20px;
+  background-color: var(--primario);
   color: white;
-  font-size: 28px;
-  padding: 15px;
-  border-radius: 50%;
-  text-decoration: none;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
 }
 
+button:hover {
+  background-color: #333;
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Estilo para la subida de archivos */
+input[type="file"] {
+  background: #f1f1f1;
+  padding: 10px;
+  font-size: 14px;
+}
