@@ -13,6 +13,21 @@
 <input id="password" type="password" placeholder="Contraseña">
 <button id="loginBtn">Ingresar</button>
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Admin</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="center">
+
+<h2>Panel Administrador</h2>
+
+<input id="email" type="email" placeholder="Correo">
+<input id="password" type="password" placeholder="Contraseña">
+<button id="loginBtn">Ingresar</button>
+
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
@@ -26,6 +41,9 @@ document.getElementById("loginBtn").onclick = async () => {
   else window.location.href = "admin.html";
 };
 </script>
+</body>
+</html>
+
 </body>
 </html>
 
