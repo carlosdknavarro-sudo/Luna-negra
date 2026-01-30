@@ -1,27 +1,28 @@
 :root {
-  --negro-fondo: #0a0a0a;
-  --negro-card: #141414;
+  --blanco: #ffffff;
+  --gris-fondo: #f9f9f9;
+  --negro-texto: #1a1a1a;
   --rosa: #ffb6c1; 
   --celeste: #87ceeb;
-  --blanco: #ffffff;
-  --borde: #222;
+  --borde: #eeeeee;
 }
 
 body {
   font-family: 'Montserrat', sans-serif;
   margin: 0;
-  background-color: var(--negro-fondo);
-  color: var(--blanco);
+  background-color: var(--gris-fondo); /* Fondo claro para todo */
+  color: var(--negro-texto);
   padding-top: 80px;
 }
 
-/* NAVBAR MODERNA */
+/* NAVBAR MODERNA Y CLARA */
 .navbar {
   position: fixed;
   top: 0; width: 100%; height: 70px;
-  background: rgba(10, 10, 10, 0.95);
-  border-bottom: 2px solid var(--rosa);
+  background: var(--blanco);
+  border-bottom: 1px solid var(--borde);
   display: flex; align-items: center; z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
 }
 
 .nav-container {
@@ -29,61 +30,83 @@ body {
   display: flex; justify-content: space-between; align-items: center;
 }
 
-/* LOGO CHICO Y ELEGANTE */
-.nav-logo {
-  height: 45px; /* Ajustado para que no ocupe toda la pantalla */
-  width: auto;
+.nav-logo { height: 40px; width: auto; }
+
+.nav-menu { list-style: none; display: flex; gap: 20px; }
+.nav-menu a { 
+  text-decoration: none; 
+  color: var(--negro-texto); 
+  font-weight: 700; 
+  text-transform: uppercase;
+  font-size: 13px;
 }
 
-.nav-menu {
-  list-style: none; display: flex; gap: 20px;
+/* GRID DE PRODUCTOS EN TIENDA */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 30px;
+  padding: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-.nav-menu a {
-  text-decoration: none; color: var(--blanco);
-  font-weight: bold; font-size: 14px; text-transform: uppercase;
+.product-card {
+  background: var(--blanco);
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid var(--borde);
+  transition: transform 0.3s;
 }
 
-/* LOGIN TOTALMENTE CENTRADO */
+.product-card:hover { transform: translateY(-5px); }
+
+.product-card img {
+  width: 100%; height: 300px; object-fit: cover; border-radius: 5px;
+}
+
+/* PANEL ADMIN (FONDO CLARO) */
+.admin-container {
+  max-width: 900px; margin: 20px auto; padding: 20px;
+}
+
+.form-box {
+  background: var(--blanco);
+  padding: 30px; border-radius: 12px;
+  border-top: 4px solid var(--rosa);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  margin-bottom: 40px;
+}
+
+.admin-input {
+  width: 100%; padding: 12px; margin-bottom: 15px;
+  border: 1px solid var(--borde); border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* LOGIN (Mantiene el centro pero en fondo claro o degradado suave) */
 .login-body {
   display: flex; justify-content: center; align-items: center;
-  height: 100vh; padding: 0; margin: 0;
-  background: radial-gradient(circle at center, #1a0b14, #0a0a0a);
+  height: 100vh; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
 }
 
 .login-container {
-  background: var(--negro-card);
+  background: var(--blanco);
   padding: 40px; border-radius: 15px;
-  border: 1px solid var(--celeste);
-  box-shadow: 0 0 25px rgba(135, 206, 235, 0.2);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   width: 100%; max-width: 320px; text-align: center;
 }
-
-.login-container h2 {
-  color: var(--rosa); margin-bottom: 25px; letter-spacing: 2px;
-}
-
-/* INPUTS Y BOTONES */
-input {
-  width: 100%; padding: 12px; margin-bottom: 15px;
-  background: #1a1a1a; border: 1px solid var(--borde);
-  border-radius: 5px; color: white; box-sizing: border-box;
-}
-
-input:focus { border-color: var(--rosa); outline: none; }
 
 .btn-primary {
   width: 100%; padding: 15px;
   background: linear-gradient(45deg, var(--rosa), var(--celeste));
-  color: #000; border: none; border-radius: 5px;
+  color: white; border: none; border-radius: 8px;
   font-weight: bold; cursor: pointer; text-transform: uppercase;
 }
 
-/* BOTÓN WHATSAPP */
-.btn-whatsapp {
-  position: fixed; bottom: 20px; right: 20px;
-  background-color: #25d366; color: white;
-  width: 60px; height: 60px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 30px; text-decoration: none; z-index: 1000;
+.stock-table {
+  width: 100%; background: var(--blanco); border-collapse: collapse;
 }
+.stock-table th { background: #f4f4f4; padding: 15px; text-align: left; border-bottom: 2px solid var(--rosa); }
+.stock-table td { padding: 15px; border-bottom: 1px solid var(--borde); }
