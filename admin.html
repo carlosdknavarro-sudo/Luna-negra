@@ -1,1 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel de Control - Luna Negra</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body style="background-color: #f4f4f4; color: #333;">
 
+  <div class="admin-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 style="color: var(--negro-texto);">Gestión de Productos</h2>
+      <a href="index.html" style="text-decoration: none; color: var(--rosa); font-weight: bold;">Salir</a>
+    </div>
+
+    <div class="form-box">
+      <input type="text" id="nombre" class="admin-input" placeholder="Nombre de la prenda">
+      <input type="number" id="precio" class="admin-input" placeholder="Precio (ej: 5500)">
+      <select id="categoria" class="admin-input">
+        <option value="Remeras">Remeras</option>
+        <option value="Pantalones">Pantalones</option>
+        <option value="Accesorios">Accesorios</option>
+      </select>
+      <input type="file" id="imagen" class="admin-input">
+      <button id="btnAgregar" class="btn-primary">Subir Producto</button>
+    </div>
+
+    <div class="form-box">
+      <h3>Inventario</h3>
+      <table class="stock-table">
+        <thead>
+          <tr>
+            <th>Imagen</th>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Borrar</th>
+          </tr>
+        </thead>
+        <tbody id="lista-productos"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
