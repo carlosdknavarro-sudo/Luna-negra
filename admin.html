@@ -2,23 +2,48 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Admin</title>
+  <title>Admin - Luna Negra</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-<h2>Agregar Producto</h2>
+  <nav class="navbar">
+    <div class="nav-container">
+      <img src="img/logo.png" alt="Logo" class="nav-logo">
+      <a href="index.html" style="text-decoration:none; color:black; font-weight:bold;">VER TIENDA</a>
+    </div>
+  </nav>
 
-<input id="nombre" placeholder="Nombre">
-<input id="precio" type="number" placeholder="Precio">
-<select id="categoria">
-  <option value="hombre">Hombre</option>
-  <option value="mujer">Mujer</option>
-</select>
-<input type="file" id="imagen">
-<button id="agregar">Agregar producto</button>
+  <div class="admin-container">
+    <div class="form-box">
+      <h2>Subir Nuevo Producto</h2>
+      <input type="text" id="nombre" placeholder="Nombre del Producto">
+      <input type="number" id="precio" placeholder="Precio">
+      <select id="categoria">
+        <option value="Remeras">Remeras</option>
+        <option value="Pantalones">Pantalones</option>
+        <option value="Accesorios">Accesorios</option>
+      </select>
+      <input type="file" id="imagen">
+      <button id="btnAgregar" class="btn-primary">PUBLICAR</button>
+    </div>
 
-<script type="module" src="js/admin.js"></script>
+    <h2>Gestión de Stock</h2>
+    <table class="stock-table">
+      <thead>
+        <tr>
+          <th>Imagen</th>
+          <th>Nombre</th>
+          <th>Precio</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="lista-productos">
+        </tbody>
+    </table>
+  </div>
+
+  <script type="module" src="js/admin.js"></script>
 </body>
 </html>
-
