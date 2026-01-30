@@ -1,53 +1,52 @@
-import { supabase } from "./supabase.js";
+// js/admin.js
+import { supabase } from './supabase.js';
 
-const lista = document.getElementById("lista-productos");
+const btnAgregar = document.getElementById('btnAgregar');
 
-// 1. CARGAR PRODUCTOS PARA GESTIÓN
-async function obtenerProductos() {
-  const { data, error } = await supabase.from('productos').select('*');
-  if (error) return;
-  
-  lista.innerHTML = "";
-  data.forEach(prod => {
-    lista.innerHTML += `
-      <tr>
-        <td><img src="${prod.imagen}"></td>
-        <td>${prod.nombre}</td>
-        <td>$${prod.precio}</td>
-        <td><button class="btn-delete" onclick="eliminarProducto(${prod.id})"><i class="fa-solid fa-trash"></i></button></td>
-      </tr>
-    `;
-  });
-}
+btnAgregar.addEventListener('click', async () => {
+    const nombre = document.getElementById('nombre').value;
+    const precio = document.getElementById('precio').value;
+    const categoria = document.getElementById('categoria').value; // Usando tu columna 'categoria'
+    const file = document.getElementById('imagen').files[0];
 
-// 2. FUNCIÓN PARA ELIMINAR (La exponemos a la ventana)
-window.eliminarProducto = async (id) => {
-  if (confirm("¿Seguro que quieres eliminar este producto?")) {
-    const { error } = await supabase.from('productos').delete().eq('id', id);
-    if (error) alert("Error al eliminar");
-    else obtenerProductos(); // Recargar lista
-  }
-};
+    if (!nombre || !precio || !file) {
+        alert("Por favor completa nombre, precio y selecciona una imagen");
+        return;
+    }
 
-// 3. AGREGAR NUEVO PRODUCTO
-document.getElementById("btnAgregar").onclick = async () => {
-  const nomVal = document.getElementById("nombre").value;
-  const preVal = document.getElementById("precio").value;
-  const catVal = document.getElementById("categoria").value;
-  const file = document.getElementById("imagen").files[0];
+    try {
+        // 1. Subir la imagen al bucket 'productos'
+        const fileName = `${Date.now()}-${file.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('productos')
+            .upload(fileName, file);
 
-  if (!file || !nomVal) return alert("Completa todos los campos");
+        if (uploadError) throw uploadError;
 
-  const path = `productos/${Date.now()}_${file.name}`;
-  await supabase.storage.from("productos").upload(path, file);
-  const { data } = supabase.storage.from("productos").getPublicUrl(path);
+        // 2. Obtener la URL pública real
+        const { data: urlData } = supabase.storage
+            .from('productos')
+            .getPublicUrl(fileName);
 
-  await supabase.from("productos").insert({
-    nombre: nomVal, precio: preVal, categoria: catVal, imagen: data.publicUrl
-  });
+        const urlFinal = urlData.publicUrl;
 
-  alert("Producto subido!");
-  location.reload(); 
-};
+        // 3. Insertar en la tabla usando el nombre de columna 'imagen'
+        const { error: dbError } = await supabase
+            .from('productos')
+            .insert([{ 
+                nombre: nombre, 
+                precio: precio, 
+                imagen: urlFinal, // <-- Nombre corregido según tu captura
+                categoria: categoria 
+            }]);
 
-obtenerProductos();
+        if (dbError) throw dbError;
+
+        alert("¡Producto subido con éxito!");
+        location.reload();
+
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Ocurrió un error: " + error.message);
+    }
+});
