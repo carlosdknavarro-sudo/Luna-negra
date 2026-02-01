@@ -3,120 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Luna Negra</title>
+  <title>Luna Negra - Colección Exclusiva</title>
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@300;500;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="login-body">
+<body>
 
-  <div class="login-container" id="login-section">
-    <img src="img/logo.png" alt="Logo" style="height: 50px; margin-bottom: 20px;">
-    <h2>ADMIN LOGIN</h2>
-    <input type="email" id="email" placeholder="Correo">
-    <input type="password" id="password" placeholder="Contraseña">
-    <button id="loginBtn" class="btn-primary">INGRESAR</button>
-    
-    <div style="margin-top: 15px;">
-      <a href="index.html" style="color: #666; text-decoration: none; font-size: 14px;">Volver al Inicio</a>
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <h1 class="brand-name">Luna Negra</h1>
+      </div>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="#" class="filter-btn active" data-categoria="todos">Inicio</a></li>
+          <li><a href="#" class="filter-btn" data-categoria="hombre">Hombre</a></li>
+          <li><a href="#" class="filter-btn" data-categoria="mujer">Mujer</a></li>
+          <li><a href="#" class="filter-btn" data-categoria="niños">Niños</a></li>
+        </ul>
+      </nav>
+
+      <div class="social-menu">
+        <a href="https://instagram.com/TU_USUARIO" class="social-link" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://wa.me/TUNUMERO" class="btn-ws-nav" target="_blank">
+          <i class="fab fa-whatsapp"></i> <span class="ws-text">WhatsApp</span>
+        </a>
+      </div>
     </div>
-  </div>
+  </header>
 
-  <div id="admin-panel" style="display:none; width: 95%; max-width: 900px; margin: 20px auto; background: white; padding: 20px; border-radius: 15px; color: #000;">
-    <h2 style="text-align: center; font-family: sans-serif;">Inventario Luna Negra</h2>
-    <table class="stock-table" id="tabla-productos">
-      <thead>
-        <tr>
-          <th>Imagen</th>
-          <th>Nombre</th>
-          <th>Precio</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-      <tbody id="tabla-cuerpo"></tbody>
-    </table>
-    <button id="logoutBtn" style="margin-top: 20px; padding: 12px 20px; cursor: pointer;">Cerrar Sesión</button>
-  </div>
+  <main class="container">
+    <section class="hero-section">
+      <p class="subtitle">ESTILO Y CALIDAD</p>
+      <h2 class="main-title">Nuestra Colección</h2>
+      <div class="divider"></div>
+    </section>
 
-  <script type="module">
-    import { supabase } from "./js/supabase.js";
+    <div id="productos-grid" class="products-grid">
+      </div>
+  </main>
 
-    // Referencias a elementos
-    const btnLogin = document.getElementById("loginBtn");
-    const btnLogout = document.getElementById("logoutBtn");
-    const loginSection = document.getElementById("login-section");
-    const adminPanel = document.getElementById("admin-panel");
-    const tablaCuerpo = document.getElementById("tabla-cuerpo");
-
-    // Función de Login SEGURA
-    btnLogin.addEventListener("click", async () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        alert("Error de acceso: " + error.message);
-      } else {
-        loginSection.style.display = "none";
-        adminPanel.style.display = "block";
-        cargarInventario();
-      }
-    });
-
-    // Función Logout
-    btnLogout.addEventListener("click", () => {
-      location.reload();
-    });
-
-    // Cargar Inventario con creación de elementos "limpios"
-    async function cargarInventario() {
-      const { data, error } = await supabase.from('productos').select('*');
-      if (error) return console.error(error);
-
-      tablaCuerpo.innerHTML = "";
-
-      data.forEach(prod => {
-        const tr = document.createElement("tr");
-
-        // Celda Imagen
-        const tdImg = document.createElement("td");
-        const img = document.createElement("img");
-        img.src = prod.imagen;
-        img.style.width = "50px";
-        img.style.height = "50px";
-        img.style.objectFit = "cover";
-        tdImg.appendChild(img);
-
-        // Celda Nombre
-        const tdNom = document.createElement("td");
-        tdNom.textContent = prod.nombre;
-
-        // Celda Precio
-        const tdPre = document.createElement("td");
-        tdPre.textContent = "$" + prod.precio;
-
-        // Celda Botón Eliminar
-        const tdAcc = document.createElement("td");
-        const btnDel = document.createElement("button");
-        btnDel.textContent = "ELIMINAR";
-        btnDel.className = "btn-delete";
-        // Asignamos el evento de forma programática
-        btnDel.addEventListener("click", async () => {
-          if(confirm("¿Eliminar " + prod.nombre + "?")) {
-            const { error: err } = await supabase.from('productos').delete().eq('id', prod.id);
-            if(err) alert("Error al borrar");
-            else cargarInventario();
-          }
-        });
-        tdAcc.appendChild(btnDel);
-
-        // Armar la fila
-        tr.appendChild(tdImg);
-        tr.appendChild(tdNom);
-        tr.appendChild(tdPre);
-        tr.appendChild(tdAcc);
-        tablaCuerpo.appendChild(tr);
-      });
-    }
-  </script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
