@@ -2,33 +2,193 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login Admin - Luna Negra</title>
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body class="login-body">
+  <style>
+    :root {
+      --negro: #000000;
+      --gris-claro: #f4f4f4;
+      --rojo: #ff4d4d;
+    }
 
-  <div class="login-container">
-    <img src="img/logo.png" alt="Logo" style="height: 40px; margin-bottom: 10px;">
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #1a1a1a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    /* Contenedor del Login */
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    .login-container h2 {
+      margin-bottom: 25px;
+      letter-spacing: 2px;
+    }
+
+    /* Rectángulos de entrada más grandes y alineados */
+    .login-container input {
+      width: 100%;
+      height: 55px; /* Altura aumentada */
+      margin-bottom: 15px;
+      padding: 0 15px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      box-sizing: border-box; /* Evita que se salgan del contenedor */
+      display: block;
+    }
+
+    .btn-primary {
+      width: 100%;
+      height: 55px;
+      background: var(--negro);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    .btn-primary:hover { background: #333; }
+
+    /* Estilos del Inventario (Se verá después del Login) */
+    #admin-panel {
+      width: 100%;
+      max-width: 800px;
+      background: white;
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 15px;
+      display: none; /* Oculto hasta que se loguee */
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    .img-preview {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    .btn-delete {
+      background: var(--rojo);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container" id="login-section">
+    <img src="img/logo.png" alt="Logo" style="height: 60px; margin-bottom: 20px;">
     <h2>ADMIN LOGIN</h2>
-    <input id="email" type="email" placeholder="Correo">
+    <input id="email" type="email" placeholder="Correo electrónico">
     <input id="password" type="password" placeholder="Contraseña">
     <button id="loginBtn" class="btn-primary">INGRESAR</button>
-    <p style="margin-top: 15px;"><a href="index.html" style="color: var(--celeste); text-decoration: none; font-size: 12px;">Volver al Inicio</a></p>
+    <p style="margin-top: 20px;">
+      <a href="index.html" style="color: #666; text-decoration: none; font-size: 14px;">← Volver a la tienda</a>
+    </p>
+  </div>
+
+  <div id="admin-panel">
+    <h2>Gestión de Inventario</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Imagen</th>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-cuerpo">
+        </tbody>
+    </table>
+    <button onclick="window.location.reload()" style="margin-top:20px; padding:10px;">Cerrar Sesión / Refrescar</button>
   </div>
 
   <script type="module">
     import { supabase } from "./js/supabase.js";
-    const btn = document.getElementById("loginBtn");
 
-    btn.onclick = async () => {
+    const loginSection = document.getElementById("login-section");
+    const adminPanel = document.getElementById("admin-panel");
+    const tablaCuerpo = document.getElementById("tabla-cuerpo");
+
+    // LOGIN
+    document.getElementById("loginBtn").onclick = async () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (error) alert("Error: " + error.message);
-      else window.location.href = "admin.html";
+      if (error) {
+        alert("Error: " + error.message);
+      } else {
+        loginSection.style.display = "none";
+        adminPanel.style.display = "block";
+        cargarInventario(); // Al entrar, cargamos los productos
+      }
     };
+
+    // CARGAR PRODUCTOS EN TABLA
+    async function cargarInventario() {
+      const { data, error } = await supabase.from('productos').select('*');
+      if (error) return console.error(error);
+
+      tablaCuerpo.innerHTML = "";
+      data.forEach(prod => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td><img src="${prod.imagen}" class="img-preview"></td>
+          <td>${prod.nombre}</td>
+          <td>$${prod.precio}</td>
+          <td><button class="btn-delete" data-id="${prod.id}">ELIMINAR</button></td>
+        `;
+        tablaCuerpo.appendChild(fila);
+      });
+
+      // Evento para botones de eliminar
+      document.querySelectorAll(".btn-delete").forEach(btn => {
+        btn.onclick = async (e) => {
+          const id = e.target.getAttribute("data-id");
+          if (confirm("¿Seguro que quieres borrar este producto?")) {
+            const { error } = await supabase.from('productos').delete().eq('id', id);
+            if (error) alert("Error al borrar");
+            else cargarInventario(); // Recargar tabla
+          }
+        };
+      });
+    }
   </script>
 </body>
 </html>
