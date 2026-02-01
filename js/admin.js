@@ -4,70 +4,82 @@ const loginSection = document.getElementById("login-section");
 const adminPanel = document.getElementById("admin-panel");
 const tablaCuerpo = document.getElementById("tabla-cuerpo");
 
-// Manejo del Login (Seguro)
+// 1. LOGIN
 document.getElementById("loginBtn")?.addEventListener("click", async () => {
     const email = document.getElementById("email-login").value;
     const password = document.getElementById("pass-login").value;
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-        alert("Error de acceso: " + error.message);
-    } else {
+    if (error) alert("Error: " + error.message);
+    else {
         loginSection.style.display = "none";
         adminPanel.style.display = "block";
         cargarInventario();
     }
 });
 
-// Agregar Producto (Seguro)
+// 2. AGREGAR PRODUCTO CON IMAGEN LOCAL
 document.getElementById("addBtn")?.addEventListener("click", async () => {
     const nombre = document.getElementById("prodNombre").value;
     const precio = document.getElementById("prodPrecio").value;
     const categoria = document.getElementById("prodCategoria").value;
-    const imagen = document.getElementById("prodImagen").value;
+    const fotoArchivo = document.getElementById("prodFoto").files[0];
 
-    if (!nombre || !precio || !imagen) return alert("Completa todos los campos");
+    if (!nombre || !precio || !fotoArchivo) return alert("Faltan datos o la foto.");
 
-    const { error } = await supabase.from('productos').insert([{ nombre, precio, categoria, imagen }]);
-    
-    if (error) alert("Error al subir");
-    else {
-        alert("¡Producto agregado!");
-        document.getElementById("prodNombre").value = "";
-        document.getElementById("prodPrecio").value = "";
-        document.getElementById("prodImagen").value = "";
-        cargarInventario();
+    try {
+        // A. Subir imagen al Storage
+        const nombreImg = `${Date.now()}_${fotoArchivo.name}`;
+        const { error: uploadError } = await supabase.storage
+            .from('imagenes-productos')
+            .upload(nombreImg, fotoArchivo);
+
+        if (uploadError) throw uploadError;
+
+        // B. Obtener link de la foto
+        const { data: urlData } = supabase.storage.from('imagenes-productos').getPublicUrl(nombreImg);
+        const urlFinal = urlData.publicUrl;
+
+        // C. Guardar en Base de Datos
+        const { error: insertError } = await supabase.from('productos').insert([{ 
+            nombre, precio, categoria, imagen: urlFinal 
+        }]);
+
+        if (insertError) throw insertError;
+
+        alert("¡Publicado con éxito!");
+        location.reload(); // Recarga para limpiar
+    } catch (err) {
+        alert("Error: " + err.message);
     }
 });
 
-// Cerrar sesión
-document.getElementById("logoutBtn")?.addEventListener("click", () => location.reload());
-
-// Función para cargar la tabla
+// 3. CARGAR INVENTARIO
 async function cargarInventario() {
     const { data, error } = await supabase.from('productos').select('*');
     if (error) return;
-
     tablaCuerpo.innerHTML = "";
     data.forEach(prod => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td style="text-align:center; padding:10px;"><img src="${prod.imagen}" style="width:50px; height:50px; object-fit:cover; border-radius:5px;"></td>
-            <td>${prod.nombre}</td>
-            <td>$${prod.precio}</td>
-            <td><button class="btn-delete" data-id="${prod.id}">BORRAR</button></td>
+            <td style="padding:10px; text-align:center;"><img src="${prod.imagen}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;"></td>
+            <td style="font-weight:bold;">${prod.nombre}</td>
+            <td style="color:green;">$${prod.precio}</td>
+            <td><button class="btn-delete" data-id="${prod.id}" style="background:#ff4d4d; color:white; border:none; padding:8px; border-radius:5px; cursor:pointer;">Borrar</button></td>
         `;
         tablaCuerpo.appendChild(tr);
     });
 }
 
-// Escuchar clics para borrar (Seguro)
+// 4. BORRAR
 tablaCuerpo?.addEventListener("click", async (e) => {
     if (e.target.classList.contains("btn-delete")) {
         const id = e.target.getAttribute("data-id");
-        if (confirm("¿Seguro que quieres borrarlo?")) {
+        if (confirm("¿Eliminar prenda?")) {
             await supabase.from('productos').delete().eq('id', id);
             cargarInventario();
         }
     }
 });
+
+document.getElementById("logoutBtn")?.addEventListener("click", () => location.reload());
