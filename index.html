@@ -1,32 +1,122 @@
-/* Estilo para el nombre de la marca */
-.brand-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 32px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: #000;
-    margin: 0;
-}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Luna Negra</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="login-body">
 
-/* Estilo para los títulos de la tienda */
-.main-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.5rem;
-    text-align: center;
-    margin-bottom: 10px;
-}
+  <div class="login-container" id="login-section">
+    <img src="img/logo.png" alt="Logo" style="height: 50px; margin-bottom: 20px;">
+    <h2>ADMIN LOGIN</h2>
+    <input id="email" type="email" placeholder="Correo">
+    <input id="password" type="password" placeholder="Contraseña">
+    <button id="loginBtn" class="btn-primary">INGRESAR</button>
+    <p style="margin-top: 15px;">
+      <a href="index.html" style="color: #666; text-decoration: none; font-size: 14px;">Volver al Inicio</a>
+    </p>
+  </div>
 
-.divider {
-    width: 50px;
-    height: 3px;
-    background: #000;
-    margin: 0 auto 40px;
-}
+  <div id="admin-panel" style="display:none; width: 95%; max-width: 900px; margin: 20px auto; background: white; padding: 20px; border-radius: 15px; color: black;">
+    <h2 style="text-align: center;">Gestión de Productos</h2>
+    <table class="stock-table">
+      <thead>
+        <tr>
+          <th>Imagen</th>
+          <th>Nombre</th>
+          <th>Precio</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-cuerpo"></tbody>
+    </table>
+    <button id="logoutBtn" style="margin-top: 20px; padding: 12px 20px; cursor: pointer; border-radius: 8px; border: 1px solid #ddd; background: #eee;">
+      Cerrar Sesión
+    </button>
+  </div>
 
-/* Ajuste del menú para que no tenga puntitos de lista */
-.nav-menu {
-    list-style: none;
-    display: flex;
-    gap: 25px;
-    padding: 0;
-}
+  <script type="module">
+    import { supabase } from "./js/supabase.js";
+
+    const loginSection = document.getElementById("login-section");
+    const adminPanel = document.getElementById("admin-panel");
+    const tablaCuerpo = document.getElementById("tabla-cuerpo");
+    const btnLogin = document.getElementById("loginBtn");
+    const btnLogout = document.getElementById("logoutBtn");
+
+    // Lógica Segura para el Login
+    btnLogin.addEventListener('click', async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        alert("Error: " + error.message);
+      } else {
+        loginSection.style.display = "none";
+        adminPanel.style.display = "block";
+        cargarInventario();
+      }
+    });
+
+    // Lógica Segura para Cerrar Sesión
+    btnLogout.addEventListener('click', () => {
+        location.reload();
+    });
+
+    // Lógica Segura para cargar y borrar productos
+    async function cargarInventario() {
+      const { data, error } = await supabase.from('productos').select('*');
+      if (error) {
+          console.error("Error al cargar:", error);
+          return;
+      }
+
+      tablaCuerpo.innerHTML = "";
+      data.forEach(prod => {
+        const fila = document.createElement("tr");
+        
+        // Columna Imagen
+        const tdImg = document.createElement("td");
+        const img = document.createElement("img");
+        img.src = prod.imagen;
+        img.style.cssText = "width:50px; height:50px; object-fit:cover; border-radius:5px;";
+        tdImg.appendChild(img);
+        
+        // Columna Nombre
+        const tdNombre = document.createElement("td");
+        tdNombre.textContent = prod.nombre;
+        
+        // Columna Precio
+        const tdPrecio = document.createElement("td");
+        tdPrecio.textContent = `$${prod.precio}`;
+        
+        // Columna Botón Eliminar
+        const tdAccion = document.createElement("td");
+        const btnEliminar = document.createElement("button");
+        btnEliminar.textContent = "ELIMINAR";
+        btnEliminar.className = "btn-delete";
+        
+        // ASIGNACIÓN SEGURA DEL EVENTO CLICK
+        btnEliminar.addEventListener('click', async () => {
+            if(confirm(`¿Deseas eliminar ${prod.nombre}?`)) {
+                const { error: err } = await supabase.from('productos').delete().eq('id', prod.id);
+                if(err) alert("No se pudo eliminar");
+                else cargarInventario();
+            }
+        });
+        
+        tdAccion.appendChild(btnEliminar);
+        fila.appendChild(tdImg);
+        fila.appendChild(tdNombre);
+        fila.appendChild(tdPrecio);
+        fila.appendChild(tdAccion);
+        tablaCuerpo.appendChild(fila);
+      });
+    }
+  </script>
+</body>
+</html>
