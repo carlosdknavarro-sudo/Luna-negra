@@ -11,8 +11,8 @@
   <div class="login-container" id="login-section">
     <img src="img/logo.png" alt="Logo" style="height: 50px; margin-bottom: 20px;">
     <h2>ADMIN LOGIN</h2>
-    <input type="email" id="email" placeholder="Correo">
-    <input type="password" id="password" placeholder="Contraseña">
+    <input type="email" id="email-login" placeholder="Correo">
+    <input type="password" id="pass-login" placeholder="Contraseña">
     <button id="loginBtn" class="btn-primary">INGRESAR</button>
     <div style="margin-top: 15px;">
       <a href="index.html" style="color: #666; text-decoration: none; font-size: 14px;">Volver al Inicio</a>
@@ -29,23 +29,23 @@
     <div style="background: #f9f9f9; padding: 20px; border-radius: 12px; margin-bottom: 40px; border: 1px solid #eee;">
         <h3 style="margin-top: 0;">Agregar Nuevo Producto</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <input type="text" id="prodNombre" placeholder="Nombre del producto" style="height: 45px; padding: 0 15px; border-radius: 8px; border: 1px solid #ddd;">
-            <input type="number" id="prodPrecio" placeholder="Precio ($)" style="height: 45px; padding: 0 15px; border-radius: 8px; border: 1px solid #ddd;">
-            <select id="prodCategoria" style="height: 45px; padding: 0 15px; border-radius: 8px; border: 1px solid #ddd;">
+            <input type="text" id="prodNombre" placeholder="Nombre">
+            <input type="number" id="prodPrecio" placeholder="Precio ($)">
+            <select id="prodCategoria">
                 <option value="hombre">Hombre</option>
                 <option value="mujer">Mujer</option>
                 <option value="niños">Niños</option>
             </select>
-            <input type="text" id="prodImagen" placeholder="URL de la imagen (Link)" style="height: 45px; padding: 0 15px; border-radius: 8px; border: 1px solid #ddd;">
+            <input type="text" id="prodImagen" placeholder="URL Imagen (Link)">
         </div>
         <button id="addBtn" class="btn-primary" style="margin-top: 15px; height: 45px;">SUBIR PRODUCTO</button>
     </div>
 
     <h3>Productos actuales</h3>
-    <table class="stock-table" style="width: 100%; border-collapse: collapse;">
+    <table class="stock-table" style="width: 100%;">
       <thead>
         <tr style="background: #f4f4f4;">
-          <th style="padding: 12px;">Imagen</th>
+          <th>Imagen</th>
           <th>Nombre</th>
           <th>Categoría</th>
           <th>Precio</th>
@@ -56,81 +56,6 @@
     </table>
   </div>
 
-  <script type="module">
-    import { supabase } from "./js/supabase.js";
-
-    const loginSection = document.getElementById("login-section");
-    const adminPanel = document.getElementById("admin-panel");
-    const tablaCuerpo = document.getElementById("tabla-cuerpo");
-    
-    // LOGIN
-    document.getElementById("loginBtn").addEventListener('click', async () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) alert("Error: " + error.message);
-      else {
-        loginSection.style.display = "none";
-        adminPanel.style.display = "block";
-        cargarInventario();
-      }
-    });
-
-    // AGREGAR PRODUCTO
-    document.getElementById("addBtn").addEventListener('click', async () => {
-        const nombre = document.getElementById("prodNombre").value;
-        const precio = document.getElementById("prodPrecio").value;
-        const categoria = document.getElementById("prodCategoria").value;
-        const imagen = document.getElementById("prodImagen").value;
-
-        if(!nombre || !precio || !imagen) return alert("Completa todos los campos");
-
-        const { error } = await supabase.from('productos').insert([{ nombre, precio, categoria, imagen }]);
-
-        if (error) alert("Error al subir");
-        else {
-            alert("¡Producto agregado!");
-            // Limpiar campos
-            document.getElementById("prodNombre").value = "";
-            document.getElementById("prodPrecio").value = "";
-            document.getElementById("prodImagen").value = "";
-            cargarInventario();
-        }
-    });
-
-    // CERRAR SESIÓN
-    document.getElementById("logoutBtn").addEventListener('click', () => location.reload());
-
-    // CARGAR TABLA
-    async function cargarInventario() {
-      const { data, error } = await supabase.from('productos').select('*');
-      if (error) return;
-
-      tablaCuerpo.innerHTML = "";
-      data.forEach(prod => {
-        const fila = document.createElement("tr");
-        fila.innerHTML = `
-            <td style="padding: 10px; text-align: center;"><img src="${prod.imagen}" style="width:50px; height:50px; object-fit:cover; border-radius:5px;"></td>
-            <td>${prod.nombre}</td>
-            <td style="text-transform: capitalize;">${prod.categoria}</td>
-            <td>$${prod.precio}</td>
-            <td><button class="btn-delete" data-id="${prod.id}">BORRAR</button></td>
-        `;
-        tablaCuerpo.appendChild(fila);
-      });
-
-      // Eventos para borrar
-      document.querySelectorAll('.btn-delete').forEach(btn => {
-          btn.onclick = async () => {
-              const id = btn.getAttribute('data-id');
-              if(confirm("¿Eliminar producto?")) {
-                  await supabase.from('productos').delete().eq('id', id);
-                  cargarInventario();
-              }
-          }
-      });
-    }
-  </script>
+  <script type="module" src="js/admin.js"></script>
 </body>
 </html>
