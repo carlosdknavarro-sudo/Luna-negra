@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Luna Negra</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="login-body">
@@ -19,7 +20,7 @@
     </p>
   </div>
 
-  <div id="admin-panel" style="display:none; width: 90%; max-width: 800px; margin: 20px auto; background: white; padding: 20px; border-radius: 15px;">
+  <div id="admin-panel" style="display:none; width: 95%; max-width: 900px; margin: 20px auto; background: white; padding: 20px; border-radius: 15px;">
     <h2 style="color: black; text-align: center;">Inventario de Productos</h2>
     <table class="stock-table">
       <thead>
@@ -32,7 +33,9 @@
       </thead>
       <tbody id="tabla-cuerpo"></tbody>
     </table>
-    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px; cursor: pointer;">Cerrar Sesión</button>
+    <button id="logoutBtn" style="margin-top: 20px; padding: 12px 20px; cursor: pointer; border-radius: 8px; border: 1px solid #ddd; background: #eee;">
+      Cerrar Sesión / Refrescar
+    </button>
   </div>
 
   <script type="module">
@@ -41,9 +44,11 @@
     const loginSection = document.getElementById("login-section");
     const adminPanel = document.getElementById("admin-panel");
     const tablaCuerpo = document.getElementById("tabla-cuerpo");
-    const btn = document.getElementById("loginBtn");
+    const btnLogin = document.getElementById("loginBtn");
+    const btnLogout = document.getElementById("logoutBtn");
 
-    btn.onclick = async () => {
+    // Manejador del Login
+    btnLogin.addEventListener('click', async () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
@@ -52,40 +57,61 @@
       if (error) {
         alert("Error: " + error.message);
       } else {
-        // Si el login es éxito, ocultamos el login y mostramos el inventario
         loginSection.style.display = "none";
         adminPanel.style.display = "block";
-        document.body.style.display = "block"; 
         cargarInventario();
       }
-    };
+    });
+
+    // Manejador del Logout
+    btnLogout.addEventListener('click', () => {
+        location.reload();
+    });
 
     async function cargarInventario() {
       const { data, error } = await supabase.from('productos').select('*');
-      if (error) return console.error(error);
+      if (error) {
+          console.error(error);
+          return;
+      }
 
       tablaCuerpo.innerHTML = "";
       data.forEach(prod => {
         const fila = document.createElement("tr");
-        fila.innerHTML = `
-          <td><img src="${prod.imagen}" style="width:50px; height:50px; object-fit:cover; border-radius:5px;"></td>
-          <td>${prod.nombre}</td>
-          <td>$${prod.precio}</td>
-          <td><button class="btn-delete" data-id="${prod.id}">ELIMINAR</button></td>
-        `;
+        
+        // Creamos la celda de imagen
+        const tdImg = document.createElement("td");
+        tdImg.innerHTML = `<img src="${prod.imagen}" style="width:50px; height:50px; object-fit:cover; border-radius:5px;">`;
+        
+        // Celda nombre
+        const tdNombre = document.createElement("td");
+        tdNombre.textContent = prod.nombre;
+        
+        // Celda precio
+        const tdPrecio = document.createElement("td");
+        tdPrecio.textContent = `$${prod.precio}`;
+        
+        // Celda acción (Botón eliminar)
+        const tdAccion = document.createElement("td");
+        const btnEliminar = document.createElement("button");
+        btnEliminar.textContent = "ELIMINAR";
+        btnEliminar.className = "btn-delete";
+        btnEliminar.addEventListener('click', async () => {
+            if(confirm(`¿Seguro que quieres borrar ${prod.nombre}?`)) {
+                const { error: err } = await supabase.from('productos').delete().eq('id', prod.id);
+                if(err) alert("No se pudo eliminar");
+                else cargarInventario();
+            }
+        });
+        
+        tdAccion.appendChild(btnEliminar);
+        
+        fila.appendChild(tdImg);
+        fila.appendChild(tdNombre);
+        fila.appendChild(tdPrecio);
+        fila.appendChild(tdAccion);
+        
         tablaCuerpo.appendChild(fila);
-      });
-
-      // Lógica para borrar
-      document.querySelectorAll(".btn-delete").forEach(b => {
-        b.onclick = async (e) => {
-          const id = e.target.getAttribute("data-id");
-          if(confirm("¿Eliminar este producto?")) {
-            const { error: err } = await supabase.from('productos').delete().eq('id', id);
-            if(err) alert("Error");
-            else cargarInventario();
-          }
-        }
       });
     }
   </script>
