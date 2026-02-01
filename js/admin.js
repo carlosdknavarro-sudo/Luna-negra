@@ -1,52 +1,75 @@
-// js/admin.js
-import { supabase } from './supabase.js';
+import { supabase } from "./supabase.js";
 
-const btnAgregar = document.getElementById('btnAgregar');
+const loginSection = document.getElementById("login-section");
+const adminPanel = document.getElementById("admin-panel");
+const tablaCuerpo = document.getElementById("tabla-cuerpo");
 
-btnAgregar.addEventListener('click', async () => {
-    const nombre = document.getElementById('nombre').value;
-    const precio = document.getElementById('precio').value;
-    const categoria = document.getElementById('categoria').value; // Usando tu columna 'categoria'
-    const file = document.getElementById('imagen').files[0];
+// 1. Manejar el Login
+const loginBtn = document.getElementById("loginBtn");
+if (loginBtn) {
+    loginBtn.addEventListener("click", async () => {
+        const email = document.getElementById("email-login").value;
+        const pass = document.getElementById("pass-login").value;
+        const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
 
-    if (!nombre || !precio || !file) {
-        alert("Por favor completa nombre, precio y selecciona una imagen");
-        return;
-    }
+        if (error) alert("Error: " + error.message);
+        else {
+            loginSection.style.display = "none";
+            adminPanel.style.display = "block";
+            cargarInventario();
+        }
+    });
+}
 
-    try {
-        // 1. Subir la imagen al bucket 'productos'
-        const fileName = `${Date.now()}-${file.name}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('productos')
-            .upload(fileName, file);
+// 2. Agregar Producto
+const addBtn = document.getElementById("addBtn");
+if (addBtn) {
+    addBtn.addEventListener("click", async () => {
+        const nombre = document.getElementById("prodNombre").value;
+        const precio = document.getElementById("prodPrecio").value;
+        const categoria = document.getElementById("prodCategoria").value;
+        const imagen = document.getElementById("prodImagen").value;
 
-        if (uploadError) throw uploadError;
+        if (!nombre || !precio || !imagen) return alert("Completa todos los campos");
 
-        // 2. Obtener la URL pública real
-        const { data: urlData } = supabase.storage
-            .from('productos')
-            .getPublicUrl(fileName);
+        const { error } = await supabase.from('productos').insert([{ nombre, precio, categoria, imagen }]);
+        if (error) alert("Error al subir");
+        else {
+            alert("¡Subido!");
+            cargarInventario();
+        }
+    });
+}
 
-        const urlFinal = urlData.publicUrl;
+// 3. Cerrar Sesión
+document.getElementById("logoutBtn")?.addEventListener("click", () => location.reload());
 
-        // 3. Insertar en la tabla usando el nombre de columna 'imagen'
-        const { error: dbError } = await supabase
-            .from('productos')
-            .insert([{ 
-                nombre: nombre, 
-                precio: precio, 
-                imagen: urlFinal, // <-- Nombre corregido según tu captura
-                categoria: categoria 
-            }]);
+// 4. Cargar Tabla (con delegación de eventos para evitar errores)
+async function cargarInventario() {
+    const { data, error } = await supabase.from('productos').select('*');
+    if (error) return;
 
-        if (dbError) throw dbError;
+    tablaCuerpo.innerHTML = "";
+    data.forEach(prod => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><img src="${prod.imagen}" style="width:50px; height:50px; object-fit:cover; border-radius:5px;"></td>
+            <td>${prod.nombre}</td>
+            <td>${prod.categoria}</td>
+            <td>$${prod.precio}</td>
+            <td><button class="btn-delete" data-id="${prod.id}">BORRAR</button></td>
+        `;
+        tablaCuerpo.appendChild(tr);
+    });
+}
 
-        alert("¡Producto subido con éxito!");
-        location.reload();
-
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Ocurrió un error: " + error.message);
+// Escuchar los clics de la tabla de forma segura (sin onclick)
+tablaCuerpo.addEventListener("click", async (e) => {
+    if (e.target.classList.contains("btn-delete")) {
+        const id = e.target.getAttribute("data-id");
+        if (confirm("¿Borrar producto?")) {
+            await supabase.from('productos').delete().eq('id', id);
+            cargarInventario();
+        }
     }
 });
