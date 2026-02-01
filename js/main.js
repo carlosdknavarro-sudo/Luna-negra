@@ -3,8 +3,12 @@ import { supabase } from './supabase.js';
 
 async function cargarProductos() {
     const contenedor = document.getElementById('productos-grid');
-    if (!contenedor) return;
+    if (!contenedor) {
+        console.error("No se encontró el contenedor #productos-grid");
+        return;
+    }
 
+    // Traemos los datos de la tabla 'productos'
     const { data, error } = await supabase
         .from('productos')
         .select('*');
@@ -14,26 +18,29 @@ async function cargarProductos() {
         return;
     }
 
+    // Limpiamos el contenedor antes de cargar
     contenedor.innerHTML = '';
 
+    // Si no hay productos, mostramos un mensaje amistoso
+    if (data.length === 0) {
+        contenedor.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Próximamente nuevos ingresos...</p>';
+        return;
+    }
+
     data.forEach(prod => {
-        // Usamos prod.imagen porque así aparece en tu base de datos
+        // Generamos la tarjeta del producto solo con Info esencial
         contenedor.innerHTML += `
             <div class="product-card">
                 <img src="${prod.imagen}" alt="${prod.nombre}" 
-                     style="width:100%; height:250px; object-fit:cover;"
-                     onerror="this.src='https://via.placeholder.com/300?text=Error+al+cargar+foto'">
+                     onerror="this.src='https://via.placeholder.com/300?text=Imagen+no+disponible'">
                 <div class="product-info">
                     <h3>${prod.nombre}</h3>
                     <p class="precio">$${prod.precio}</p>
-                    <a href="https://wa.me/TUNUMERO?text=Hola, quiero consultar por: ${prod.nombre}" 
-                       class="btn-primary" target="_blank">
-                       Consultar WhatsApp
-                    </a>
                 </div>
             </div>
         `;
     });
 }
 
+// Ejecutar cuando la página cargue
 document.addEventListener('DOMContentLoaded', cargarProductos);
