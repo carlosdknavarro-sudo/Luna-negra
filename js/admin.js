@@ -18,7 +18,7 @@ document.getElementById("loginBtn")?.addEventListener("click", async () => {
     }
 });
 
-// 2. AGREGAR PRODUCTO CON IMAGEN LOCAL
+// 2. AGREGAR PRODUCTO
 document.getElementById("addBtn")?.addEventListener("click", async () => {
     const nombre = document.getElementById("prodNombre").value;
     const precio = document.getElementById("prodPrecio").value;
@@ -28,7 +28,6 @@ document.getElementById("addBtn")?.addEventListener("click", async () => {
     if (!nombre || !precio || !fotoArchivo) return alert("Faltan datos o la foto.");
 
     try {
-        // A. Subir imagen al Storage
         const nombreImg = `${Date.now()}_${fotoArchivo.name}`;
         const { error: uploadError } = await supabase.storage
             .from('imagenes-productos')
@@ -36,48 +35,76 @@ document.getElementById("addBtn")?.addEventListener("click", async () => {
 
         if (uploadError) throw uploadError;
 
-        // B. Obtener link de la foto
         const { data: urlData } = supabase.storage.from('imagenes-productos').getPublicUrl(nombreImg);
         const urlFinal = urlData.publicUrl;
 
-        // C. Guardar en Base de Datos
         const { error: insertError } = await supabase.from('productos').insert([{ 
-            nombre, precio, categoria, imagen: urlFinal 
+            nombre, precio: parseFloat(precio), categoria, imagen: urlFinal 
         }]);
 
         if (insertError) throw insertError;
 
         alert("¡Publicado con éxito!");
-        location.reload(); // Recarga para limpiar
+        cargarInventario();
+        // Limpiar campos
+        document.getElementById("prodNombre").value = "";
+        document.getElementById("prodPrecio").value = "";
+        document.getElementById("prodFoto").value = "";
     } catch (err) {
         alert("Error: " + err.message);
     }
 });
 
-// 3. CARGAR INVENTARIO
+// 3. CARGAR INVENTARIO (Con Botón Editar)
 async function cargarInventario() {
-    const { data, error } = await supabase.from('productos').select('*');
+    const { data, error } = await supabase.from('productos').select('*').order('created_at', { ascending: false });
     if (error) return;
+    
     tablaCuerpo.innerHTML = "";
     data.forEach(prod => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td style="padding:10px; text-align:center;"><img src="${prod.imagen}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;"></td>
             <td style="font-weight:bold;">${prod.nombre}</td>
-            <td style="color:green;">$${prod.precio}</td>
-            <td><button class="btn-delete" data-id="${prod.id}" style="background:#ff4d4d; color:white; border:none; padding:8px; border-radius:5px; cursor:pointer;">Borrar</button></td>
+            <td style="color:#d63384; font-weight:bold;">$${prod.precio}</td>
+            <td>
+                <button class="btn-edit" data-id="${prod.id}" data-precio="${prod.precio}" style="background:#87ceeb; color:white; border:none; padding:8px 12px; border-radius:5px; cursor:pointer; margin-right:5px;">Editar $</button>
+                <button class="btn-delete" data-id="${prod.id}" style="background:#ff4d4d; color:white; border:none; padding:8px 12px; border-radius:5px; cursor:pointer;">Borrar</button>
+            </td>
         `;
         tablaCuerpo.appendChild(tr);
     });
 }
 
-// 4. BORRAR
+// 4. EVENTOS DE LA TABLA (BORRAR Y EDITAR)
 tablaCuerpo?.addEventListener("click", async (e) => {
+    const id = e.target.getAttribute("data-id");
+
+    // LÓGICA PARA BORRAR
     if (e.target.classList.contains("btn-delete")) {
-        const id = e.target.getAttribute("data-id");
-        if (confirm("¿Eliminar prenda?")) {
+        if (confirm("¿Eliminar esta prenda?")) {
             await supabase.from('productos').delete().eq('id', id);
             cargarInventario();
+        }
+    }
+
+    // LÓGICA PARA EDITAR PRECIO
+    if (e.target.classList.contains("btn-edit")) {
+        const precioActual = e.target.getAttribute("data-precio");
+        const nuevoPrecio = prompt("Ingrese el nuevo precio para este producto:", precioActual);
+        
+        if (nuevoPrecio !== null && nuevoPrecio !== "" && !isNaN(nuevoPrecio)) {
+            const { error } = await supabase
+                .from('productos')
+                .update({ precio: parseFloat(nuevoPrecio) })
+                .eq('id', id);
+
+            if (error) {
+                alert("Error al actualizar precio");
+            } else {
+                alert("Precio actualizado");
+                cargarInventario();
+            }
         }
     }
 });
