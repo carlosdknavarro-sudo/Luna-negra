@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Luna Negra - Colección Exclusiva</title>
-  
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@300;500;700&display=swap">
+  <title>Luna Negra - Tienda Oficial</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Playfair+Display:wght@700&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -13,12 +12,14 @@
 
   <header class="navbar">
     <div class="nav-container">
-      <div class="nav-logo">
-        <h1 class="brand-name">Luna Negra</h1>
+      
+      <div class="nav-logo-container">
+        <img src="img/logo.png" alt="Luna Negra Logo" class="nav-logo-img">
+        <span class="brand-name">Luna Negra</span>
       </div>
 
-      <nav>
-        <ul class="nav-menu">
+      <nav class="nav-menu-wrapper">
+        <ul class="nav-menu-horizontal">
           <li><a href="#" class="filter-btn active" data-categoria="todos">Inicio</a></li>
           <li><a href="#" class="filter-btn" data-categoria="hombre">Hombre</a></li>
           <li><a href="#" class="filter-btn" data-categoria="mujer">Mujer</a></li>
@@ -26,21 +27,21 @@
         </ul>
       </nav>
 
-      <div class="social-menu">
-        <a href="https://instagram.com/TU_USUARIO" class="social-link" target="_blank"><i class="fab fa-instagram"></i></a>
-        <a href="https://wa.me/TUNUMERO" class="btn-ws-nav" target="_blank">
-          <i class="fab fa-whatsapp"></i> <span class="ws-text">WhatsApp</span>
+      <div class="nav-actions">
+        <a href="https://wa.me/TUNUMERO" class="btn-whatsapp-header" target="_blank">
+          <i class="fab fa-whatsapp"></i> WhatsApp
         </a>
       </div>
+
     </div>
   </header>
 
   <main class="container">
-    <section class="hero-section">
+    <div class="hero-section">
       <p class="subtitle">ESTILO Y CALIDAD</p>
       <h2 class="main-title">Nuestra Colección</h2>
       <div class="divider"></div>
-    </section>
+    </div>
 
     <div id="productos-grid" class="products-grid">
       </div>
