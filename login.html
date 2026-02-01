@@ -1,1 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Luna Negra</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="login-body">
 
+  <div class="login-container" id="login-section">
+    <img src="img/logo.png" alt="Logo" style="height: 50px; margin-bottom: 20px;">
+    <h2>ADMIN LOGIN</h2>
+    <input id="email" type="email" placeholder="Correo">
+    <input id="password" type="password" placeholder="Contraseña">
+    <button id="loginBtn" class="btn-primary">INGRESAR</button>
+    <p style="margin-top: 15px;">
+      <a href="index.html" style="color: #666; text-decoration: none; font-size: 14px;">Volver al Inicio</a>
+    </p>
+  </div>
+
+  <div id="admin-panel" style="display:none; width: 90%; max-width: 800px; margin: 20px auto; background: white; padding: 20px; border-radius: 15px;">
+    <h2 style="color: black; text-align: center;">Inventario de Productos</h2>
+    <table class="stock-table">
+      <thead>
+        <tr>
+          <th>Imagen</th>
+          <th>Nombre</th>
+          <th>Precio</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-cuerpo"></tbody>
+    </table>
+    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px; cursor: pointer;">Cerrar Sesión</button>
+  </div>
+
+  <script type="module">
+    import { supabase } from "./js/supabase.js";
+
+    const loginSection = document.getElementById("login-section");
+    const adminPanel = document.getElementById("admin-panel");
+    const tablaCuerpo = document.getElementById("tabla-cuerpo");
+    const btn = document.getElementById("loginBtn");
+
+    btn.onclick = async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        alert("Error: " + error.message);
+      } else {
+        // Si el login es éxito, ocultamos el login y mostramos el inventario
+        loginSection.style.display = "none";
+        adminPanel.style.display = "block";
+        document.body.style.display = "block"; 
+        cargarInventario();
+      }
+    };
+
+    async function cargarInventario() {
+      const { data, error } = await supabase.from('productos').select('*');
+      if (error) return console.error(error);
+
+      tablaCuerpo.innerHTML = "";
+      data.forEach(prod => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td><img src="${prod.imagen}" style="width:50px; height:50px; object-fit:cover; border-radius:5px;"></td>
+          <td>${prod.nombre}</td>
+          <td>$${prod.precio}</td>
+          <td><button class="btn-delete" data-id="${prod.id}">ELIMINAR</button></td>
+        `;
+        tablaCuerpo.appendChild(fila);
+      });
+
+      // Lógica para borrar
+      document.querySelectorAll(".btn-delete").forEach(b => {
+        b.onclick = async (e) => {
+          const id = e.target.getAttribute("data-id");
+          if(confirm("¿Eliminar este producto?")) {
+            const { error: err } = await supabase.from('productos').delete().eq('id', id);
+            if(err) alert("Error");
+            else cargarInventario();
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
