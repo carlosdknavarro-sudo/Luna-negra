@@ -2,43 +2,57 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.supabase.co; script-src 'self' 'unsafe-inline' https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*.supabase.co; connect-src 'self' https://*.supabase.co;">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Control - Luna Negra</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body style="background-color: #f4f4f4; color: #333;">
 
-  <div class="admin-container">
+  <div class="admin-container" style="max-width: 800px; margin: 40px auto; padding: 20px;">
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2 style="color: var(--negro-texto);">Gestión de Productos</h2>
-      <a href="index.html" style="text-decoration: none; color: var(--rosa); font-weight: bold;">Salir</a>
+      <h2 style="color: var(--negro-texto); font-family: 'Playfair Display', serif;">Gestión de Productos</h2>
+      <a href="index.html" id="logoutBtn" style="text-decoration: none; color: var(--rosa); font-weight: bold;">Salir</a>
     </div>
 
-    <div class="form-box">
-      <input type="text" id="nombre" class="admin-input" placeholder="Nombre de la prenda">
-      <input type="number" id="precio" class="admin-input" placeholder="Precio (ej: 5500)">
-      <select id="categoria" class="admin-input">
+    <div class="form-box" style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px;">
+      <input type="text" id="prodNombre" class="admin-input" placeholder="Nombre de la prenda" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px;">
+      
+      <input type="number" id="prodPrecio" class="admin-input" placeholder="Precio (ej: 5500)" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px;">
+      
+      <select id="prodCategoria" class="admin-input" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px;">
         <option value="Remeras">Remeras</option>
         <option value="Pantalones">Pantalones</option>
         <option value="Accesorios">Accesorios</option>
+        <option value="Hombre">Hombre</option>
+        <option value="Mujer">Mujer</option>
+        <option value="Niños">Niños</option>
       </select>
-      <input type="file" id="imagen" class="admin-input">
-      <button id="btnAgregar" class="btn-primary">Subir Producto</button>
+      
+      <label style="display: block; margin-bottom: 5px; font-size: 12px; color: #666;">Foto del producto:</label>
+      <input type="file" id="prodFoto" class="admin-input" style="width: 100%; margin-bottom: 15px;">
+      
+      <button id="addBtn" class="btn-primary" style="width: 100%; padding: 12px; background: linear-gradient(45deg, var(--rosa), var(--celeste)); border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer;">Publicar Producto</button>
     </div>
 
-    <div class="form-box">
-      <h3>Inventario</h3>
-      <table class="stock-table">
+    <div class="form-box" style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+      <h3 style="margin-top: 0;">Inventario Actual</h3>
+      <table class="stock-table" style="width: 100%; border-collapse: collapse;">
         <thead>
-          <tr>
-            <th>Imagen</th>
+          <tr style="border-bottom: 2px solid #eee; text-align: left;">
+            <th style="padding: 10px;">Imagen</th>
             <th>Nombre</th>
             <th>Precio</th>
-            <th>Borrar</th>
+            <th>Acciones</th>
           </tr>
         </thead>
-        <tbody id="lista-productos"></tbody>
+        <tbody id="tabla-cuerpo">
+          </tbody>
       </table>
     </div>
+
   </div>
 
   <script type="module" src="js/admin.js"></script>
