@@ -1,33 +1,32 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Luna Negra - Tienda</title>
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
+/* Estilo para el nombre de la marca */
+.brand-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #000;
+    margin: 0;
+}
 
-  <nav class="navbar">
-    <div class="nav-container">
-      <img src="img/logo.png" alt="Luna Negra" class="nav-logo">
-      <ul class="nav-menu">
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="login.html">Admin</a></li>
-      </ul>
-    </div>
-  </nav>
+/* Estilo para los títulos de la tienda */
+.main-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 10px;
+}
 
-  <main class="container">
-    <h2 style="text-align:center; color: var(--celeste); margin-top: 40px;">COLECCIÓN LUNA NEGRA</h2>
-    <div id="productos-grid" class="products-grid">
-      </div>
-  </main>
+.divider {
+    width: 50px;
+    height: 3px;
+    background: #000;
+    margin: 0 auto 40px;
+}
 
-  <a href="https://wa.me/TUNUMERO" class="btn-whatsapp" target="_blank">
-    <i class="fa-brands fa-whatsapp"></i>
-  </a>
-
-  <script type="module" src="js/main.js"></script>
-</body>
-</html>
+/* Ajuste del menú para que no tenga puntitos de lista */
+.nav-menu {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+    padding: 0;
+}
