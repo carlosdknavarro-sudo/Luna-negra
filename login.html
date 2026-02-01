@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Luna Negra</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="login-body">
@@ -12,30 +11,49 @@
   <div class="login-container" id="login-section">
     <img src="img/logo.png" alt="Logo" style="height: 50px; margin-bottom: 20px;">
     <h2>ADMIN LOGIN</h2>
-    <input id="email" type="email" placeholder="Correo">
-    <input id="password" type="password" placeholder="Contraseña">
+    <input type="email" id="email" placeholder="Correo">
+    <input type="password" id="password" placeholder="Contraseña">
     <button id="loginBtn" class="btn-primary">INGRESAR</button>
-    <p style="margin-top: 15px;">
+    <div style="margin-top: 15px;">
       <a href="index.html" style="color: #666; text-decoration: none; font-size: 14px;">Volver al Inicio</a>
-    </p>
+    </div>
   </div>
 
-  <div id="admin-panel" style="display:none; width: 95%; max-width: 900px; margin: 20px auto; background: white; padding: 20px; border-radius: 15px;">
-    <h2 style="color: black; text-align: center;">Inventario de Productos</h2>
-    <table class="stock-table">
+  <div id="admin-panel" style="display:none; width: 95%; max-width: 900px; margin: 20px auto; background: white; padding: 30px; border-radius: 20px; color: black; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2 style="margin: 0;">Gestión de Inventario</h2>
+        <button id="logoutBtn" style="background: #eee; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;">Cerrar Sesión</button>
+    </div>
+
+    <div style="background: #f9f9f9; padding: 20px; border-radius: 12px; margin-bottom: 40px; border: 1px solid #eee;">
+        <h3 style="margin-top: 0;">Agregar Nuevo Producto</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <input type="text" id="prodNombre" placeholder="Nombre del producto" style="height: 45px; padding: 0 15px; border-radius: 8px; border: 1px solid #ddd;">
+            <input type="number" id="prodPrecio" placeholder="Precio ($)" style="height: 45px; padding: 0 15px; border-radius: 8px; border: 1px solid #ddd;">
+            <select id="prodCategoria" style="height: 45px; padding: 0 15px; border-radius: 8px; border: 1px solid #ddd;">
+                <option value="hombre">Hombre</option>
+                <option value="mujer">Mujer</option>
+                <option value="niños">Niños</option>
+            </select>
+            <input type="text" id="prodImagen" placeholder="URL de la imagen (Link)" style="height: 45px; padding: 0 15px; border-radius: 8px; border: 1px solid #ddd;">
+        </div>
+        <button id="addBtn" class="btn-primary" style="margin-top: 15px; height: 45px;">SUBIR PRODUCTO</button>
+    </div>
+
+    <h3>Productos actuales</h3>
+    <table class="stock-table" style="width: 100%; border-collapse: collapse;">
       <thead>
-        <tr>
-          <th>Imagen</th>
+        <tr style="background: #f4f4f4;">
+          <th style="padding: 12px;">Imagen</th>
           <th>Nombre</th>
+          <th>Categoría</th>
           <th>Precio</th>
           <th>Acción</th>
         </tr>
       </thead>
       <tbody id="tabla-cuerpo"></tbody>
     </table>
-    <button id="logoutBtn" style="margin-top: 20px; padding: 12px 20px; cursor: pointer; border-radius: 8px; border: 1px solid #ddd; background: #eee;">
-      Cerrar Sesión / Refrescar
-    </button>
   </div>
 
   <script type="module">
@@ -44,74 +62,73 @@
     const loginSection = document.getElementById("login-section");
     const adminPanel = document.getElementById("admin-panel");
     const tablaCuerpo = document.getElementById("tabla-cuerpo");
-    const btnLogin = document.getElementById("loginBtn");
-    const btnLogout = document.getElementById("logoutBtn");
-
-    // Manejador del Login
-    btnLogin.addEventListener('click', async () => {
+    
+    // LOGIN
+    document.getElementById("loginBtn").addEventListener('click', async () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        alert("Error: " + error.message);
-      } else {
+      if (error) alert("Error: " + error.message);
+      else {
         loginSection.style.display = "none";
         adminPanel.style.display = "block";
         cargarInventario();
       }
     });
 
-    // Manejador del Logout
-    btnLogout.addEventListener('click', () => {
-        location.reload();
+    // AGREGAR PRODUCTO
+    document.getElementById("addBtn").addEventListener('click', async () => {
+        const nombre = document.getElementById("prodNombre").value;
+        const precio = document.getElementById("prodPrecio").value;
+        const categoria = document.getElementById("prodCategoria").value;
+        const imagen = document.getElementById("prodImagen").value;
+
+        if(!nombre || !precio || !imagen) return alert("Completa todos los campos");
+
+        const { error } = await supabase.from('productos').insert([{ nombre, precio, categoria, imagen }]);
+
+        if (error) alert("Error al subir");
+        else {
+            alert("¡Producto agregado!");
+            // Limpiar campos
+            document.getElementById("prodNombre").value = "";
+            document.getElementById("prodPrecio").value = "";
+            document.getElementById("prodImagen").value = "";
+            cargarInventario();
+        }
     });
 
+    // CERRAR SESIÓN
+    document.getElementById("logoutBtn").addEventListener('click', () => location.reload());
+
+    // CARGAR TABLA
     async function cargarInventario() {
       const { data, error } = await supabase.from('productos').select('*');
-      if (error) {
-          console.error(error);
-          return;
-      }
+      if (error) return;
 
       tablaCuerpo.innerHTML = "";
       data.forEach(prod => {
         const fila = document.createElement("tr");
-        
-        // Creamos la celda de imagen
-        const tdImg = document.createElement("td");
-        tdImg.innerHTML = `<img src="${prod.imagen}" style="width:50px; height:50px; object-fit:cover; border-radius:5px;">`;
-        
-        // Celda nombre
-        const tdNombre = document.createElement("td");
-        tdNombre.textContent = prod.nombre;
-        
-        // Celda precio
-        const tdPrecio = document.createElement("td");
-        tdPrecio.textContent = `$${prod.precio}`;
-        
-        // Celda acción (Botón eliminar)
-        const tdAccion = document.createElement("td");
-        const btnEliminar = document.createElement("button");
-        btnEliminar.textContent = "ELIMINAR";
-        btnEliminar.className = "btn-delete";
-        btnEliminar.addEventListener('click', async () => {
-            if(confirm(`¿Seguro que quieres borrar ${prod.nombre}?`)) {
-                const { error: err } = await supabase.from('productos').delete().eq('id', prod.id);
-                if(err) alert("No se pudo eliminar");
-                else cargarInventario();
-            }
-        });
-        
-        tdAccion.appendChild(btnEliminar);
-        
-        fila.appendChild(tdImg);
-        fila.appendChild(tdNombre);
-        fila.appendChild(tdPrecio);
-        fila.appendChild(tdAccion);
-        
+        fila.innerHTML = `
+            <td style="padding: 10px; text-align: center;"><img src="${prod.imagen}" style="width:50px; height:50px; object-fit:cover; border-radius:5px;"></td>
+            <td>${prod.nombre}</td>
+            <td style="text-transform: capitalize;">${prod.categoria}</td>
+            <td>$${prod.precio}</td>
+            <td><button class="btn-delete" data-id="${prod.id}">BORRAR</button></td>
+        `;
         tablaCuerpo.appendChild(fila);
+      });
+
+      // Eventos para borrar
+      document.querySelectorAll('.btn-delete').forEach(btn => {
+          btn.onclick = async () => {
+              const id = btn.getAttribute('data-id');
+              if(confirm("¿Eliminar producto?")) {
+                  await supabase.from('productos').delete().eq('id', id);
+                  cargarInventario();
+              }
+          }
       });
     }
   </script>
